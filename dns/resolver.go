@@ -367,30 +367,27 @@ type Config struct {
 	Hosts          *trie.DomainTrie
 	Policy         map[string]NameServer
 	SearchDomains  []string
+	GetDialer      func() C.Proxy
 }
 
 func NewResolver(config Config) *Resolver {
-	defaultResolver := &Resolver{
-		main:     transform(config.Default, nil),
-		lruCache: cache.New(cache.WithSize(4096), cache.WithStale(true)),
-	}
 
 	r := &Resolver{
 		ipv6:          config.IPv6,
-		main:          transform(config.Main, defaultResolver),
+		main:          transform(config.Main, config.GetDialer),
 		lruCache:      cache.New(cache.WithSize(4096), cache.WithStale(true)),
 		hosts:         config.Hosts,
 		searchDomains: config.SearchDomains,
 	}
 
 	if len(config.Fallback) != 0 {
-		r.fallback = transform(config.Fallback, defaultResolver)
+		r.fallback = transform(config.Fallback, config.GetDialer)
 	}
 
 	if len(config.Policy) != 0 {
 		r.policy = trie.New()
 		for domain, nameserver := range config.Policy {
-			r.policy.Insert(domain, transform([]NameServer{nameserver}, defaultResolver))
+			r.policy.Insert(domain, transform([]NameServer{nameserver}, config.GetDialer))
 		}
 	}
 

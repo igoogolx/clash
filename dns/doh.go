@@ -4,15 +4,13 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
-	"fmt"
+	C "github.com/Dreamacro/clash/constant"
 	"io"
-	"math/rand"
 	"net"
 	"net/http"
+	"strconv"
 
 	"github.com/Dreamacro/clash/component/dialer"
-	"github.com/Dreamacro/clash/component/resolver"
-
 	D "github.com/miekg/dns"
 )
 
@@ -82,7 +80,7 @@ func (dc *dohClient) doRequest(req *http.Request) (msg *D.Msg, err error) {
 	return msg, err
 }
 
-func newDoHClient(url, iface string, r *Resolver) *dohClient {
+func newDoHClient(url, iface string, getDialer func() C.Proxy) *dohClient {
 	return &dohClient{
 		url: url,
 		transport: &http.Transport{
@@ -93,20 +91,21 @@ func newDoHClient(url, iface string, r *Resolver) *dohClient {
 					return nil, err
 				}
 
-				ips, err := resolver.LookupIPWithResolver(ctx, host, r)
+				numPort, err := strconv.Atoi(port)
+
 				if err != nil {
 					return nil, err
-				} else if len(ips) == 0 {
-					return nil, fmt.Errorf("%w: %s", resolver.ErrIPNotFound, host)
-				}
-				ip := ips[rand.Intn(len(ips))]
-
-				options := []dialer.Option{}
-				if iface != "" {
-					options = append(options, dialer.WithInterface(iface))
 				}
 
-				return dialer.DialContext(ctx, "tcp", net.JoinHostPort(ip.String(), port), options...)
+				return getDialer().DialContext(ctx, &C.Metadata{
+					NetWork: C.TCP,
+					SrcIP:   nil,
+					DstIP:   nil,
+					SrcPort: 0,
+					DstPort: C.Port(numPort),
+					Host:    host,
+				}, dialer.WithInterface(iface))
+
 			},
 			TLSClientConfig: &tls.Config{
 				// alpn identifier, see https://tools.ietf.org/html/draft-hoffman-dprive-dns-tls-alpn-00#page-6

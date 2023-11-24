@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	C "github.com/Dreamacro/clash/constant"
 	"net"
 	"strings"
 	"time"
@@ -84,12 +85,12 @@ func isIPRequest(q D.Question) bool {
 	return q.Qclass == D.ClassINET && (q.Qtype == D.TypeA || q.Qtype == D.TypeAAAA)
 }
 
-func transform(servers []NameServer, resolver *Resolver) []dnsClient {
+func transform(servers []NameServer, getDialer func() C.Proxy) []dnsClient {
 	ret := []dnsClient{}
 	for _, s := range servers {
 		switch s.Net {
 		case "https":
-			ret = append(ret, newDoHClient(s.Addr, s.Interface, resolver))
+			ret = append(ret, newDoHClient(s.Addr, s.Interface, getDialer))
 			continue
 		case "dhcp":
 			ret = append(ret, newDHCPClient(s.Addr))
@@ -106,10 +107,10 @@ func transform(servers []NameServer, resolver *Resolver) []dnsClient {
 				UDPSize: 4096,
 				Timeout: 5 * time.Second,
 			},
-			port:  port,
-			host:  host,
-			iface: s.Interface,
-			r:     resolver,
+			port:      port,
+			host:      host,
+			iface:     s.Interface,
+			getDialer: getDialer,
 		})
 	}
 	return ret

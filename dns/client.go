@@ -4,8 +4,10 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	C "github.com/Dreamacro/clash/constant"
 	"math/rand"
 	"net"
+	"strconv"
 	"strings"
 
 	"github.com/Dreamacro/clash/component/dialer"
@@ -16,10 +18,11 @@ import (
 
 type client struct {
 	*D.Client
-	r     *Resolver
-	port  string
-	host  string
-	iface string
+	r         *Resolver
+	port      string
+	host      string
+	iface     string
+	getDialer func() C.Proxy
 }
 
 func (c *client) Exchange(m *D.Msg) (*D.Msg, error) {
@@ -46,16 +49,30 @@ func (c *client) ExchangeContext(ctx context.Context, m *D.Msg) (*D.Msg, error) 
 		ip = ips[rand.Intn(len(ips))]
 	}
 
-	network := "udp"
+	network := C.UDP
 	if strings.HasPrefix(c.Client.Net, "tcp") {
-		network = "tcp"
+		network = C.TCP
 	}
 
 	options := []dialer.Option{}
 	if c.iface != "" {
 		options = append(options, dialer.WithInterface(c.iface))
 	}
-	conn, err := dialer.DialContext(ctx, network, net.JoinHostPort(ip.String(), c.port), options...)
+
+	numPort, err := strconv.Atoi(c.port)
+
+	if err != nil {
+		return nil, err
+	}
+	var conn net.Conn
+	conn, err = c.getDialer().DialContext(ctx, &C.Metadata{
+		NetWork: network,
+		SrcIP:   nil,
+		DstIP:   ip,
+		SrcPort: 0,
+		DstPort: C.Port(numPort),
+		Host:    "",
+	}, options...)
 	if err != nil {
 		return nil, err
 	}
