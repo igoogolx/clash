@@ -367,7 +367,7 @@ type Config struct {
 	Hosts          *trie.DomainTrie
 	Policy         map[string]NameServer
 	SearchDomains  []string
-	GetDialer      func() C.Proxy
+	GetDialer      func() (C.Proxy, error)
 }
 
 func NewResolver(config Config) *Resolver {
