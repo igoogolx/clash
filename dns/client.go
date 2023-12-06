@@ -22,7 +22,7 @@ type client struct {
 	port      string
 	host      string
 	iface     string
-	getDialer func() C.Proxy
+	getDialer func() (C.Proxy, error)
 }
 
 func (c *client) Exchange(m *D.Msg) (*D.Msg, error) {
@@ -65,7 +65,12 @@ func (c *client) ExchangeContext(ctx context.Context, m *D.Msg) (*D.Msg, error) 
 		return nil, err
 	}
 	var conn net.Conn
-	conn, err = c.getDialer().DialContext(ctx, &C.Metadata{
+	connDial, err := c.getDialer()
+	if err != nil {
+		return nil, err
+	}
+
+	conn, err = connDial.DialContext(ctx, &C.Metadata{
 		NetWork: network,
 		SrcIP:   nil,
 		DstIP:   ip,

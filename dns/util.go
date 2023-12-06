@@ -85,7 +85,7 @@ func isIPRequest(q D.Question) bool {
 	return q.Qclass == D.ClassINET && (q.Qtype == D.TypeA || q.Qtype == D.TypeAAAA)
 }
 
-func transform(servers []NameServer, getDialer func() C.Proxy) []dnsClient {
+func transform(servers []NameServer, getDialer func() (C.Proxy, error)) []dnsClient {
 	ret := []dnsClient{}
 	for _, s := range servers {
 		switch s.Net {

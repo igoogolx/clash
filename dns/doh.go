@@ -80,7 +80,7 @@ func (dc *dohClient) doRequest(req *http.Request) (msg *D.Msg, err error) {
 	return msg, err
 }
 
-func newDoHClient(url, iface string, getDialer func() C.Proxy) *dohClient {
+func newDoHClient(url, iface string, getDialer func() (C.Proxy, error)) *dohClient {
 	return &dohClient{
 		url: url,
 		transport: &http.Transport{
@@ -97,7 +97,12 @@ func newDoHClient(url, iface string, getDialer func() C.Proxy) *dohClient {
 					return nil, err
 				}
 
-				return getDialer().DialContext(ctx, &C.Metadata{
+				connDial, err := getDialer()
+				if err != nil {
+					return nil, err
+				}
+
+				return connDial.DialContext(ctx, &C.Metadata{
 					NetWork: C.TCP,
 					SrcIP:   nil,
 					DstIP:   nil,
