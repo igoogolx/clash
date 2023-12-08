@@ -93,7 +93,7 @@ func transform(servers []NameServer, getDialer func() (C.Proxy, error)) []dnsCli
 			ret = append(ret, newDoHClient(s.Addr, s.Interface, getDialer))
 			continue
 		case "dhcp":
-			ret = append(ret, newDHCPClient(s.Addr))
+			ret = append(ret, newDHCPClient(s.Addr, getDialer))
 			continue
 		}
 

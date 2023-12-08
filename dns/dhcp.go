@@ -3,6 +3,7 @@ package dns
 import (
 	"bytes"
 	"context"
+	C "github.com/Dreamacro/clash/constant"
 	"net"
 	"sync"
 	"time"
@@ -31,6 +32,7 @@ type dhcpClient struct {
 	done      chan struct{}
 	clients   []dnsClient
 	err       error
+	getDialer func() (C.Proxy, error)
 }
 
 func (d *dhcpClient) Exchange(m *D.Msg) (msg *D.Msg, err error) {
@@ -76,7 +78,7 @@ func (d *dhcpClient) resolve(ctx context.Context) ([]dnsClient, error) {
 					})
 				}
 
-				res = transform(nameserver, nil)
+				res = transform(nameserver, d.getDialer)
 			}
 
 			d.lock.Lock()
@@ -141,6 +143,6 @@ func (d *dhcpClient) invalidate() (bool, error) {
 	return d.done == nil, nil
 }
 
-func newDHCPClient(ifaceName string) *dhcpClient {
-	return &dhcpClient{ifaceName: ifaceName}
+func newDHCPClient(ifaceName string, getDialer func() (C.Proxy, error)) *dhcpClient {
+	return &dhcpClient{ifaceName: ifaceName, getDialer: getDialer}
 }
