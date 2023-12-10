@@ -69,15 +69,19 @@ func (c *client) ExchangeContext(ctx context.Context, m *D.Msg) (*D.Msg, error) 
 	if err != nil {
 		return nil, err
 	}
+	if network == C.TCP {
+		conn, err = connDial.DialContext(ctx, &C.Metadata{
+			NetWork: network,
+			SrcIP:   nil,
+			DstIP:   ip,
+			SrcPort: 0,
+			DstPort: C.Port(numPort),
+			Host:    "",
+		}, options...)
+	} else {
+		conn, err = dialer.DialContext(ctx, "udp", net.JoinHostPort(ip.String(), c.port), options...)
+	}
 
-	conn, err = connDial.DialContext(ctx, &C.Metadata{
-		NetWork: network,
-		SrcIP:   nil,
-		DstIP:   ip,
-		SrcPort: 0,
-		DstPort: C.Port(numPort),
-		Host:    "",
-	}, options...)
 	if err != nil {
 		return nil, err
 	}
