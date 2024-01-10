@@ -41,6 +41,7 @@ type Resolver struct {
 	lruCache              *cache.LruCache
 	policy                *trie.DomainTrie
 	searchDomains         []string
+	disableCache          bool
 }
 
 // LookupIP request with TypeA and TypeAAAA, priority return TypeA
@@ -156,39 +157,45 @@ func (r *Resolver) ExchangeContext(ctx context.Context, m *D.Msg) (msg *D.Msg, e
 	return r.exchangeWithoutCache(ctx, m)
 }
 
+func (r *Resolver) exchange(ctx context.Context, m *D.Msg) (msg *D.Msg, err error) {
+	q := m.Question[0]
+	isIPReq := isIPRequest(q)
+	if isIPReq {
+		return r.ipExchange(ctx, m)
+	}
+
+	if matched := r.matchPolicy(m); len(matched) != 0 {
+		return r.batchExchange(ctx, matched, m)
+	}
+	return r.batchExchange(ctx, r.main, m)
+}
+
 // ExchangeWithoutCache a batch of dns request, and it do NOT GET from cache
 func (r *Resolver) exchangeWithoutCache(ctx context.Context, m *D.Msg) (msg *D.Msg, err error) {
-	q := m.Question[0]
+	if r.disableCache {
+		msg, err = r.exchange(ctx, m)
+	} else {
+		q := m.Question[0]
+		ret, err, shared := r.group.Do(q.String(), func() (result any, err error) {
+			defer func() {
+				if err != nil {
+					return
+				}
 
-	ret, err, shared := r.group.Do(q.String(), func() (result any, err error) {
-		defer func() {
-			if err != nil {
-				return
+				msg := result.(*D.Msg)
+				// OPT RRs MUST NOT be cached, forwarded, or stored in or loaded from master files.
+				msg.Extra = lo.Filter(msg.Extra, func(rr D.RR, index int) bool {
+					return rr.Header().Rrtype != D.TypeOPT
+				})
+				putMsgToCache(r.lruCache, q.String(), q, msg)
+			}()
+			return r.exchange(ctx, m)
+		})
+		if err == nil {
+			msg = ret.(*D.Msg)
+			if shared {
+				msg = msg.Copy()
 			}
-
-			msg := result.(*D.Msg)
-			// OPT RRs MUST NOT be cached, forwarded, or stored in or loaded from master files.
-			msg.Extra = lo.Filter(msg.Extra, func(rr D.RR, index int) bool {
-				return rr.Header().Rrtype != D.TypeOPT
-			})
-			putMsgToCache(r.lruCache, q.String(), q, msg)
-		}()
-
-		isIPReq := isIPRequest(q)
-		if isIPReq {
-			return r.ipExchange(ctx, m)
-		}
-
-		if matched := r.matchPolicy(m); len(matched) != 0 {
-			return r.batchExchange(ctx, matched, m)
-		}
-		return r.batchExchange(ctx, r.main, m)
-	})
-
-	if err == nil {
-		msg = ret.(*D.Msg)
-		if shared {
-			msg = msg.Copy()
 		}
 	}
 
@@ -367,6 +374,7 @@ type Config struct {
 	Hosts          *trie.DomainTrie
 	Policy         map[string]NameServer
 	SearchDomains  []string
+	DisableCache   bool
 	GetDialer      func() (C.Proxy, error)
 }
 
@@ -378,6 +386,7 @@ func NewResolver(config Config) *Resolver {
 		lruCache:      cache.New(cache.WithSize(4096), cache.WithStale(true)),
 		hosts:         config.Hosts,
 		searchDomains: config.SearchDomains,
+		disableCache:  config.DisableCache,
 	}
 
 	if len(config.Fallback) != 0 {
