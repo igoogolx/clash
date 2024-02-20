@@ -5,14 +5,14 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
-	C "github.com/Dreamacro/clash/constant"
+	C "github.com/igoogolx/clash/constant"
 	"net"
 	"strings"
 	"time"
 
-	"github.com/Dreamacro/clash/common/cache"
-	"github.com/Dreamacro/clash/common/picker"
-	"github.com/Dreamacro/clash/log"
+	"github.com/igoogolx/clash/common/cache"
+	"github.com/igoogolx/clash/common/picker"
+	"github.com/igoogolx/clash/log"
 
 	D "github.com/miekg/dns"
 	"github.com/samber/lo"

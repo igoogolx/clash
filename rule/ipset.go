@@ -1,9 +1,9 @@
 package rules
 
 import (
-	"github.com/Dreamacro/clash/component/ipset"
-	C "github.com/Dreamacro/clash/constant"
-	"github.com/Dreamacro/clash/log"
+	"github.com/igoogolx/clash/component/ipset"
+	C "github.com/igoogolx/clash/constant"
+	"github.com/igoogolx/clash/log"
 )
 
 // Implements C.Rule
