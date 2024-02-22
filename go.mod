@@ -1,4 +1,4 @@
-module github.com/igoogolx/clash
+module github.com/igogolx/clash
 
 go 1.21
 
