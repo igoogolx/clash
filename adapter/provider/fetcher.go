@@ -7,8 +7,8 @@ import (
 	"path/filepath"
 	"time"
 
-	types "github.com/igoogolx/clash/constant/provider"
-	"github.com/igoogolx/clash/log"
+	types "github.com/Dreamacro/clash/constant/provider"
+	"github.com/Dreamacro/clash/log"
 )
 
 var (

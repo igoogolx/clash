@@ -1,7 +1,7 @@
 package provider
 
 import (
-	"github.com/igoogolx/clash/constant"
+	"github.com/Dreamacro/clash/constant"
 )
 
 // Vehicle Type

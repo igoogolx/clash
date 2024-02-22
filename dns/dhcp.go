@@ -3,14 +3,14 @@ package dns
 import (
 	"bytes"
 	"context"
-	C "github.com/igoogolx/clash/constant"
+	C "github.com/Dreamacro/clash/constant"
 	"net"
 	"sync"
 	"time"
 
-	"github.com/igoogolx/clash/component/dhcp"
-	"github.com/igoogolx/clash/component/iface"
-	"github.com/igoogolx/clash/component/resolver"
+	"github.com/Dreamacro/clash/component/dhcp"
+	"github.com/Dreamacro/clash/component/iface"
+	"github.com/Dreamacro/clash/component/resolver"
 
 	D "github.com/miekg/dns"
 )

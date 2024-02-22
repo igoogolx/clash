@@ -4,13 +4,13 @@ import (
 	"bytes"
 	"context"
 	"crypto/tls"
-	C "github.com/igoogolx/clash/constant"
+	C "github.com/Dreamacro/clash/constant"
 	"io"
 	"net"
 	"net/http"
 	"strconv"
 
-	"github.com/igoogolx/clash/component/dialer"
+	"github.com/Dreamacro/clash/component/dialer"
 	D "github.com/miekg/dns"
 )
 

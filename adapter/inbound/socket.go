@@ -4,9 +4,9 @@ import (
 	"net"
 	"net/netip"
 
-	C "github.com/igoogolx/clash/constant"
-	"github.com/igoogolx/clash/context"
-	"github.com/igoogolx/clash/transport/socks5"
+	C "github.com/Dreamacro/clash/constant"
+	"github.com/Dreamacro/clash/context"
+	"github.com/Dreamacro/clash/transport/socks5"
 )
 
 // NewSocket receive TCP inbound and return ConnContext
