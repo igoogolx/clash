@@ -53,7 +53,7 @@ func (rw *nopConn) SetWriteDeadline(time.Time) error { return nil }
 
 type nopPacketConn struct{}
 
-func (npc *nopPacketConn) WriteTo(b []byte, addr net.Addr) (n int, err error) { return len(b), nil }
+func (npc *nopPacketConn) WriteTo(b []byte, addr net.Addr) (n int, err error) { return len(b), io.EOF }
 func (npc *nopPacketConn) ReadFrom(b []byte) (int, net.Addr, error)           { return 0, nil, io.EOF }
 func (npc *nopPacketConn) Close() error                                       { return nil }
 func (npc *nopPacketConn) LocalAddr() net.Addr                                { return &net.UDPAddr{IP: net.IPv4zero, Port: 0} }
