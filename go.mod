@@ -7,9 +7,6 @@ toolchain go1.22.5
 require (
 	github.com/Dreamacro/protobytes v0.0.0-20230911123819-0bbf144b9b9a
 	github.com/dlclark/regexp2 v1.11.4
-	github.com/go-chi/chi/v5 v5.1.0
-	github.com/go-chi/cors v1.2.1
-	github.com/go-chi/render v1.0.3
 	github.com/gofrs/uuid/v5 v5.3.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/insomniacslk/dhcp v0.0.0-20241203100832-a481575ed0ef
@@ -22,7 +19,6 @@ require (
 	github.com/vishvananda/netlink v1.3.0
 	go.etcd.io/bbolt v1.3.11
 	go.uber.org/atomic v1.11.0
-	go.uber.org/automaxprocs v1.6.0
 	golang.org/x/crypto v0.31.0
 	golang.org/x/net v0.32.0
 	golang.org/x/sync v0.10.0
@@ -31,10 +27,10 @@ require (
 )
 
 require (
-	github.com/ajg/form v1.5.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/josharian/native v1.1.0 // indirect
+	github.com/kr/pretty v0.1.0 // indirect
 	github.com/kr/text v0.2.0 // indirect
 	github.com/mdlayher/socket v0.4.1 // indirect
 	github.com/oschwald/maxminddb-golang v1.13.0 // indirect
@@ -45,4 +41,5 @@ require (
 	golang.org/x/mod v0.18.0 // indirect
 	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/tools v0.22.0 // indirect
+	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 )
