@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/Dreamacro/clash/component/trie"
-	C "github.com/Dreamacro/clash/constant"
 	"github.com/Dreamacro/clash/dns"
 )
 
