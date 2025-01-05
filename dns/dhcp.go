@@ -3,6 +3,7 @@ package dns
 import (
 	"bytes"
 	"context"
+	"fmt"
 	C "github.com/Dreamacro/clash/constant"
 	"net"
 	"sync"
@@ -43,9 +44,14 @@ func (d *dhcpClient) Exchange(m *D.Msg) (msg *D.Msg, err error) {
 }
 
 func (d *dhcpClient) ExchangeContext(ctx context.Context, m *D.Msg) (msg *D.Msg, err error) {
-	clients, err := d.resolve(ctx)
-	if err != nil {
-		return nil, err
+	var clients = d.clients
+	if len(clients) == 0 {
+		clients, err = d.resolve(ctx)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		go d.update()
 	}
 
 	return batchExchange(ctx, clients, m)
@@ -143,6 +149,17 @@ func (d *dhcpClient) invalidate() (bool, error) {
 	return d.done == nil, nil
 }
 
+func (d *dhcpClient) update() {
+	ctx, cancel := context.WithTimeout(context.Background(), DHCPTimeout)
+	defer cancel()
+	_, err := d.resolve(ctx)
+	if err != nil {
+		fmt.Printf("DHCP resolve failed on updating: %s\n", err)
+	}
+}
+
 func newDHCPClient(ifaceName string, getDialer func() (C.Proxy, error)) *dhcpClient {
-	return &dhcpClient{ifaceName: ifaceName, getDialer: getDialer}
+	newClient := &dhcpClient{ifaceName: ifaceName, getDialer: getDialer}
+	go newClient.update()
+	return newClient
 }
