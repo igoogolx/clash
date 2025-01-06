@@ -3,8 +3,9 @@ package dns
 import (
 	"bytes"
 	"context"
-	"fmt"
+	"github.com/Dreamacro/clash/component/system_dns"
 	C "github.com/Dreamacro/clash/constant"
+	"github.com/Dreamacro/clash/log"
 	"net"
 	"sync"
 	"time"
@@ -93,7 +94,9 @@ func (d *dhcpClient) resolve(ctx context.Context) ([]dnsClient, error) {
 			close(done)
 
 			d.done = nil
-			d.clients = res
+			if len(res) != 0 {
+				d.clients = res
+			}
 			d.err = err
 		}()
 	}
@@ -154,12 +157,32 @@ func (d *dhcpClient) update() {
 	defer cancel()
 	_, err := d.resolve(ctx)
 	if err != nil {
-		fmt.Printf("DHCP resolve failed on updating: %s\n", err)
+		log.Warnln("DHCP resolve failed on updating: %s\n", err)
 	}
+}
+
+func (d *dhcpClient) init() {
+	dns, err := system_dns.ResolveServers(d.ifaceName)
+	if err != nil {
+		log.Warnln("DHCP resolve failed on init: %s\n", err)
+	}
+	var res []dnsClient
+	nameserver := make([]NameServer, 0, len(dns))
+	for _, item := range dns {
+		nameserver = append(nameserver, NameServer{
+			Addr:      net.JoinHostPort(item, "53"),
+			Interface: d.ifaceName,
+		})
+	}
+
+	res = transform(nameserver, d.getDialer)
+	d.lock.Lock()
+	d.clients = res
+	d.lock.Unlock()
 }
 
 func newDHCPClient(ifaceName string, getDialer func() (C.Proxy, error)) *dhcpClient {
 	newClient := &dhcpClient{ifaceName: ifaceName, getDialer: getDialer}
-	go newClient.update()
+	go newClient.init()
 	return newClient
 }
