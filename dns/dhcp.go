@@ -7,6 +7,7 @@ import (
 	C "github.com/Dreamacro/clash/constant"
 	"github.com/Dreamacro/clash/log"
 	"net"
+	"net/netip"
 	"sync"
 	"time"
 
@@ -169,10 +170,14 @@ func (d *dhcpClient) init() {
 	var res []dnsClient
 	nameserver := make([]NameServer, 0, len(dns))
 	for _, item := range dns {
-		nameserver = append(nameserver, NameServer{
-			Addr:      net.JoinHostPort(item, "53"),
-			Interface: d.ifaceName,
-		})
+		itemAddr, err := netip.ParseAddr(item)
+		if err == nil && itemAddr.Is4() {
+			nameserver = append(nameserver, NameServer{
+				Addr:      net.JoinHostPort(item, "53"),
+				Interface: d.ifaceName,
+			})
+		}
+
 	}
 
 	res = transform(nameserver, d.getDialer)
