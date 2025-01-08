@@ -52,11 +52,12 @@ func (d *dhcpClient) ExchangeContext(ctx context.Context, m *D.Msg) (msg *D.Msg,
 		if err != nil {
 			return nil, err
 		}
-	} else {
+	}
+	mRes, err := batchExchange(ctx, clients, m)
+	if err != nil {
 		go d.update()
 	}
-
-	return batchExchange(ctx, clients, m)
+	return mRes, err
 }
 
 func (d *dhcpClient) resolve(ctx context.Context) ([]dnsClient, error) {
@@ -188,6 +189,6 @@ func (d *dhcpClient) init() {
 
 func newDHCPClient(ifaceName string, getDialer func() (C.Proxy, error)) *dhcpClient {
 	newClient := &dhcpClient{ifaceName: ifaceName, getDialer: getDialer}
-	go newClient.init()
+	newClient.init()
 	return newClient
 }
