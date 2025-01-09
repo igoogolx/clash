@@ -167,6 +167,8 @@ func (d *dhcpClient) init() {
 	dns, err := system_dns.ResolveServers(d.ifaceName)
 	if err != nil {
 		log.Warnln("DHCP resolve failed on init: %s\n", err)
+	} else {
+		log.Warnln("DHCP resolve: %s\n", dns)
 	}
 	var res []dnsClient
 	nameserver := make([]NameServer, 0, len(dns))
