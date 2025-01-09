@@ -13,7 +13,6 @@ require (
 	github.com/gofrs/uuid/v5 v5.3.0
 	github.com/gorilla/websocket v1.5.3
 	github.com/insomniacslk/dhcp v0.0.0-20241224095048-b56fa0d5f25d
-	github.com/johnstarich/go/dns v0.2.4
 	github.com/mdlayher/netlink v1.7.2
 	github.com/miekg/dns v1.1.62
 	github.com/oschwald/geoip2-golang v1.11.0
