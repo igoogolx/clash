@@ -115,10 +115,15 @@ func findProcessPath(network string, from netip.AddrPort, _ netip.AddrPort) (str
 
 func getExecPathFromPID(pid uint32) (string, error) {
 	buf := make([]byte, procpidpathinfosize)
+	targetPid := int(pid)
+	pgid, err := syscall.Getpgid(int(pid))
+	if err == nil {
+		targetPid = pgid
+	}
 	_, _, errno := syscall.Syscall6(
 		syscall.SYS_PROC_INFO,
 		proccallnumpidinfo,
-		uintptr(pid),
+		uintptr(targetPid),
 		procpidpathinfo,
 		0,
 		uintptr(unsafe.Pointer(&buf[0])),
