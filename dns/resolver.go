@@ -137,10 +137,11 @@ func (r *Resolver) ExchangeContext(ctx context.Context, m *D.Msg) (msg *D.Msg, e
 	}
 
 	q := m.Question[0]
-	cache, expireTime, hit := r.lruCache.GetWithExpire(q.String())
-	if hit {
+	cacheItem, expireTime, hit := r.lruCache.GetWithExpire(q.String())
+	cachedMsg, ok := cacheItem.(*D.Msg)
+	if hit && ok {
 		now := time.Now()
-		msg = cache.(*D.Msg).Copy()
+		msg = copyMsgFromCache(m, cachedMsg)
 		if expireTime.Before(now) {
 			setMsgTTL(msg, uint32(1)) // Continue fetch
 			go func() {
