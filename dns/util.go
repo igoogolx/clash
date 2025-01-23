@@ -20,6 +20,15 @@ import (
 
 const serverFailureCacheTTL uint32 = 5
 
+func copyMsgFromCache(r *D.Msg, m *D.Msg) *D.Msg {
+	msg := r.Copy()
+	msg.Answer = m.Copy().Answer
+	msg.SetRcode(r, D.RcodeSuccess)
+	msg.Authoritative = true
+	msg.RecursionAvailable = true
+	return msg
+}
+
 func minimalTTL(records []D.RR) uint32 {
 	rr := lo.MinBy(records, func(r1 D.RR, r2 D.RR) bool {
 		return r1.Header().Ttl < r2.Header().Ttl
