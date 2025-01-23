@@ -23,7 +23,6 @@ const serverFailureCacheTTL uint32 = 5
 func copyMsgFromCache(r *D.Msg, m *D.Msg) *D.Msg {
 	msg := r.Copy()
 	msg.Answer = m.Copy().Answer
-	setMsgTTL(msg, 1)
 	msg.SetRcode(r, D.RcodeSuccess)
 	msg.Authoritative = true
 	msg.RecursionAvailable = true
