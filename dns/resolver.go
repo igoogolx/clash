@@ -172,35 +172,35 @@ func (r *Resolver) exchange(ctx context.Context, m *D.Msg) (msg *D.Msg, err erro
 }
 
 // ExchangeWithoutCache a batch of dns request, and it do NOT GET from cache
-func (r *Resolver) exchangeWithoutCache(ctx context.Context, m *D.Msg) (msg *D.Msg, err error) {
+func (r *Resolver) exchangeWithoutCache(ctx context.Context, m *D.Msg) (*D.Msg, error) {
 	if r.disableCache {
-		msg, err = r.exchange(ctx, m)
-	} else {
-		q := m.Question[0]
-		ret, err, shared := r.group.Do(q.String(), func() (result any, err error) {
-			defer func() {
-				if err != nil {
-					return
-				}
-
-				msg := result.(*D.Msg)
-				// OPT RRs MUST NOT be cached, forwarded, or stored in or loaded from master files.
-				msg.Extra = lo.Filter(msg.Extra, func(rr D.RR, index int) bool {
-					return rr.Header().Rrtype != D.TypeOPT
-				})
-				putMsgToCache(r.lruCache, q.String(), q, msg)
-			}()
-			return r.exchange(ctx, m)
-		})
-		if err == nil {
-			msg = ret.(*D.Msg)
-			if shared {
-				msg = msg.Copy()
-			}
-		}
+		return r.exchange(ctx, m)
 	}
+	q := m.Question[0]
+	ret, err, shared := r.group.Do(q.String(), func() (result any, err error) {
+		defer func() {
+			if err != nil {
+				return
+			}
 
-	return
+			msg := result.(*D.Msg)
+			// OPT RRs MUST NOT be cached, forwarded, or stored in or loaded from master files.
+			msg.Extra = lo.Filter(msg.Extra, func(rr D.RR, index int) bool {
+				return rr.Header().Rrtype != D.TypeOPT
+			})
+			putMsgToCache(r.lruCache, q.String(), q, msg)
+		}()
+		return r.exchange(ctx, m)
+	})
+	if err != nil {
+		return nil, err
+	}
+	res := ret.(*D.Msg)
+	if shared {
+		res = res.Copy()
+	}
+	return res, nil
+
 }
 
 func (r *Resolver) batchExchange(ctx context.Context, clients []dnsClient, m *D.Msg) (msg *D.Msg, err error) {
