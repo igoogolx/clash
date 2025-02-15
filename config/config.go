@@ -575,6 +575,9 @@ func parseNameServer(servers []string) ([]dns.NameServer, error) {
 		case "dhcp":
 			addr = u.Host
 			dnsNetType = "dhcp" // UDP from DHCP
+		case "system":
+			addr = u.Host
+			dnsNetType = "system" // UDP from System
 		default:
 			return nil, fmt.Errorf("DNS NameServer[%d] unsupport scheme: %s", idx, u.Scheme)
 		}
