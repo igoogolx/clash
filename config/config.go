@@ -540,7 +540,7 @@ func hostWithDefaultPort(host string, defPort string) (string, error) {
 	return net.JoinHostPort(hostname, port), nil
 }
 
-func parseNameServer(servers []string) ([]dns.NameServer, error) {
+func ParseNameServer(servers []string) ([]dns.NameServer, error) {
 	nameservers := []dns.NameServer{}
 
 	for idx, server := range servers {
@@ -602,7 +602,7 @@ func parseNameServerPolicy(nsPolicy map[string]string) (map[string]dns.NameServe
 	policy := map[string]dns.NameServer{}
 
 	for domain, server := range nsPolicy {
-		nameservers, err := parseNameServer([]string{server})
+		nameservers, err := ParseNameServer([]string{server})
 		if err != nil {
 			return nil, err
 		}
@@ -645,11 +645,11 @@ func parseDNS(rawCfg *RawConfig, hosts *trie.DomainTrie) (*DNS, error) {
 		},
 	}
 	var err error
-	if dnsCfg.NameServer, err = parseNameServer(cfg.NameServer); err != nil {
+	if dnsCfg.NameServer, err = ParseNameServer(cfg.NameServer); err != nil {
 		return nil, err
 	}
 
-	if dnsCfg.Fallback, err = parseNameServer(cfg.Fallback); err != nil {
+	if dnsCfg.Fallback, err = ParseNameServer(cfg.Fallback); err != nil {
 		return nil, err
 	}
 
@@ -660,7 +660,7 @@ func parseDNS(rawCfg *RawConfig, hosts *trie.DomainTrie) (*DNS, error) {
 	if len(cfg.DefaultNameserver) == 0 {
 		return nil, errors.New("default nameserver should have at least one nameserver")
 	}
-	if dnsCfg.DefaultNameserver, err = parseNameServer(cfg.DefaultNameserver); err != nil {
+	if dnsCfg.DefaultNameserver, err = ParseNameServer(cfg.DefaultNameserver); err != nil {
 		return nil, err
 	}
 	// check default nameserver is pure ip addr
