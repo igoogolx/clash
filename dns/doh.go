@@ -24,6 +24,10 @@ type dohClient struct {
 	transport *http.Transport
 }
 
+func (dc *dohClient) GetServers() []string {
+	return []string{dc.url}
+}
+
 func (dc *dohClient) Exchange(m *D.Msg) (msg *D.Msg, err error) {
 	return dc.ExchangeContext(context.Background(), m)
 }

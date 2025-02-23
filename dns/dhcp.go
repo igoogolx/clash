@@ -38,6 +38,14 @@ type dhcpClient struct {
 	getDialer func() (C.Proxy, error)
 }
 
+func (d *dhcpClient) GetServers() []string {
+	var servers []string
+	for _, c := range d.clients {
+		servers = append(servers, c.GetServers()...)
+	}
+	return servers
+}
+
 func (d *dhcpClient) Exchange(m *D.Msg) (msg *D.Msg, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), resolver.DefaultDNSTimeout)
 	defer cancel()
