@@ -20,6 +20,14 @@ type systemClient struct {
 	getDialer func() (C.Proxy, error)
 }
 
+func (s *systemClient) GetServers() []string {
+	var servers []string
+	for _, c := range s.clients {
+		servers = append(servers, c.GetServers()...)
+	}
+	return servers
+}
+
 func (s *systemClient) Exchange(m *D.Msg) (msg *D.Msg, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), resolver.DefaultDNSTimeout)
 	defer cancel()

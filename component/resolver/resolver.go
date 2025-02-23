@@ -36,6 +36,7 @@ var (
 )
 
 type Resolver interface {
+	GetServers() []string
 	LookupIP(ctx context.Context, host string) ([]net.IP, error)
 	LookupIPv4(ctx context.Context, host string) ([]net.IP, error)
 	LookupIPv6(ctx context.Context, host string) ([]net.IP, error)

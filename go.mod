@@ -1,13 +1,13 @@
 module github.com/Dreamacro/clash
 
-go 1.23
+go 1.23.0
 
 toolchain go1.23.4
 
 require (
 	github.com/Dreamacro/protobytes v0.0.0-20230911123819-0bbf144b9b9a
-	github.com/dlclark/regexp2 v1.11.4
-	github.com/gofrs/uuid/v5 v5.3.0
+	github.com/dlclark/regexp2 v1.11.5
+	github.com/gofrs/uuid/v5 v5.3.1
 	github.com/gorilla/websocket v1.5.3
 	github.com/insomniacslk/dhcp v0.0.0-20250109001534-8abf58130905
 	github.com/mdlayher/netlink v1.7.2
@@ -19,8 +19,8 @@ require (
 	github.com/vishvananda/netlink v1.3.0
 	go.etcd.io/bbolt v1.4.0
 	go.uber.org/atomic v1.11.0
-	golang.org/x/crypto v0.33.0
-	golang.org/x/net v0.34.0
+	golang.org/x/crypto v0.34.0
+	golang.org/x/net v0.35.0
 	golang.org/x/sync v0.11.0
 	golang.org/x/sys v0.30.0
 	golang.zx2c4.com/wireguard/windows v0.5.3

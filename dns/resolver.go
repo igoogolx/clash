@@ -21,6 +21,7 @@ import (
 )
 
 type dnsClient interface {
+	GetServers() []string
 	Exchange(m *D.Msg) (msg *D.Msg, err error)
 	ExchangeContext(ctx context.Context, m *D.Msg) (msg *D.Msg, err error)
 }
@@ -42,6 +43,14 @@ type Resolver struct {
 	policy                *trie.DomainTrie
 	searchDomains         []string
 	disableCache          bool
+}
+
+func (r *Resolver) GetServers() []string {
+	var servers []string
+	for _, c := range r.main {
+		servers = append(servers, c.GetServers()...)
+	}
+	return servers
 }
 
 // LookupIP request with TypeA and TypeAAAA, priority return TypeA

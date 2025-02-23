@@ -25,6 +25,10 @@ type client struct {
 	getDialer func() (C.Proxy, error)
 }
 
+func (c *client) GetServers() []string {
+	return []string{c.host}
+}
+
 func (c *client) Exchange(m *D.Msg) (*D.Msg, error) {
 	return c.ExchangeContext(context.Background(), m)
 }
