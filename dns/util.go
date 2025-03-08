@@ -99,7 +99,7 @@ func transform(servers []NameServer, getDialer func() (C.Proxy, error)) []dnsCli
 	for _, s := range servers {
 		switch s.Net {
 		case "https":
-			ret = append(ret, newDoHClient(s.Addr, s.Interface, getDialer))
+			ret = append(ret, newDoHClient(s.Addr, getDialer))
 			continue
 		case "dhcp":
 			ret = append(ret, newDHCPClient(s.Addr, getDialer))

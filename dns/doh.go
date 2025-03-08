@@ -10,7 +10,6 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/Dreamacro/clash/component/dialer"
 	D "github.com/miekg/dns"
 )
 
@@ -84,7 +83,7 @@ func (dc *dohClient) doRequest(req *http.Request) (msg *D.Msg, err error) {
 	return msg, err
 }
 
-func newDoHClient(url, iface string, getDialer func() (C.Proxy, error)) *dohClient {
+func newDoHClient(url string, getDialer func() (C.Proxy, error)) *dohClient {
 	return &dohClient{
 		url: url,
 		transport: &http.Transport{
@@ -113,7 +112,7 @@ func newDoHClient(url, iface string, getDialer func() (C.Proxy, error)) *dohClie
 					SrcPort: 0,
 					DstPort: C.Port(numPort),
 					Host:    host,
-				}, dialer.WithInterface(iface))
+				})
 
 			},
 			TLSClientConfig: &tls.Config{
