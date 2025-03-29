@@ -32,17 +32,15 @@ type result struct {
 }
 
 type Resolver struct {
-	ipv6                  bool
-	hosts                 *trie.DomainTrie
-	main                  []dnsClient
-	fallback              []dnsClient
-	fallbackDomainFilters []fallbackDomainFilter
-	fallbackIPFilters     []fallbackIPFilter
-	group                 singleflight.Group
-	lruCache              *cache.LruCache
-	policy                *trie.DomainTrie
-	searchDomains         []string
-	disableCache          bool
+	ipv6          bool
+	hosts         *trie.DomainTrie
+	main          []dnsClient
+	fallback      []dnsClient
+	group         singleflight.Group
+	lruCache      *cache.LruCache
+	policy        *trie.DomainTrie
+	searchDomains []string
+	disableCache  bool
 }
 
 func (r *Resolver) GetServers() []string {
@@ -123,15 +121,6 @@ func (r *Resolver) ResolveIPv6(host string) (ip net.IP, err error) {
 		return nil, fmt.Errorf("%w: %s", resolver.ErrIPNotFound, host)
 	}
 	return ips[rand.Intn(len(ips))], nil
-}
-
-func (r *Resolver) shouldIPFallback(ip net.IP) bool {
-	for _, filter := range r.fallbackIPFilters {
-		if filter.Match(ip) {
-			return true
-		}
-	}
-	return false
 }
 
 // Exchange a batch of dns request, and it use cache
@@ -237,36 +226,9 @@ func (r *Resolver) matchPolicy(m *D.Msg) []dnsClient {
 	return record.Data.([]dnsClient)
 }
 
-func (r *Resolver) shouldOnlyQueryFallback(m *D.Msg) bool {
-	if r.fallback == nil || len(r.fallbackDomainFilters) == 0 {
-		return false
-	}
-
-	domain := r.msgToDomain(m)
-
-	if domain == "" {
-		return false
-	}
-
-	for _, df := range r.fallbackDomainFilters {
-		if df.Match(domain) {
-			return true
-		}
-	}
-
-	return false
-}
-
 func (r *Resolver) ipExchange(ctx context.Context, m *D.Msg) (msg *D.Msg, err error) {
 	if matched := r.matchPolicy(m); len(matched) != 0 {
 		res := <-r.asyncExchange(ctx, matched, m)
-		return res.Msg, res.Error
-	}
-
-	onlyFallback := r.shouldOnlyQueryFallback(m)
-
-	if onlyFallback {
-		res := <-r.asyncExchange(ctx, r.fallback, m)
 		return res.Msg, res.Error
 	}
 
@@ -282,14 +244,9 @@ func (r *Resolver) ipExchange(ctx context.Context, m *D.Msg) (msg *D.Msg, err er
 	res := <-msgCh
 	if res.Error == nil {
 		if ips := msgToIP(res.Msg); len(ips) != 0 {
-			shouldNotFallback := lo.EveryBy(ips, func(ip net.IP) bool {
-				return !r.shouldIPFallback(ip)
-			})
-			if shouldNotFallback {
-				msg = res.Msg // no need to wait for fallback result
-				err = res.Error
-				return msg, err
-			}
+			msg = res.Msg // no need to wait for fallback result
+			err = res.Error
+			return msg, err
 		}
 	}
 
@@ -408,22 +365,6 @@ func NewResolver(config Config) *Resolver {
 		for domain, nameserver := range config.Policy {
 			r.policy.Insert(domain, transform([]NameServer{nameserver}, config.GetDialer))
 		}
-	}
-
-	fallbackIPFilters := []fallbackIPFilter{}
-	if config.FallbackFilter.GeoIP {
-		fallbackIPFilters = append(fallbackIPFilters, &geoipFilter{
-			code: config.FallbackFilter.GeoIPCode,
-		})
-	}
-	for _, ipnet := range config.FallbackFilter.IPCIDR {
-		fallbackIPFilters = append(fallbackIPFilters, &ipnetFilter{ipnet: ipnet})
-	}
-	r.fallbackIPFilters = fallbackIPFilters
-
-	if len(config.FallbackFilter.Domain) != 0 {
-		fallbackDomainFilters := []fallbackDomainFilter{NewDomainFilter(config.FallbackFilter.Domain)}
-		r.fallbackDomainFilters = fallbackDomainFilters
 	}
 
 	return r
