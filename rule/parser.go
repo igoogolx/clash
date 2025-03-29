@@ -21,9 +21,6 @@ func ParseRule(tp, payload, target string, params []string) (C.Rule, error) {
 		parsed = NewDomainSuffix(payload, target)
 	case C.RuleConfigDomainKeyword:
 		parsed = NewDomainKeyword(payload, target)
-	case C.RuleConfigGeoIP:
-		noResolve := HasNoResolve(params)
-		parsed = NewGEOIP(payload, target, noResolve)
 	case C.RuleConfigIPCIDR, C.RuleConfigIPCIDR6:
 		noResolve := HasNoResolve(params)
 		parsed, parseErr = NewIPCIDR(payload, target, WithIPCIDRNoResolve(noResolve))

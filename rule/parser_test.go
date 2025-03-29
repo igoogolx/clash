@@ -44,12 +44,6 @@ func TestParseRule(t *testing.T) {
 			expectedRule: NewDomainKeyword("example.com", policy),
 		},
 		{
-			tp:      C.RuleConfigGeoIP,
-			payload: "CN",
-			target:  policy, params: []string{noResolve},
-			expectedRule: NewGEOIP("CN", policy, true),
-		},
-		{
 			tp:           C.RuleConfigIPCIDR,
 			payload:      "127.0.0.0/8",
 			target:       policy,
