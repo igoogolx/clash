@@ -7,7 +7,6 @@ import (
 	"sync"
 
 	"github.com/Dreamacro/clash/common/cache"
-	"github.com/Dreamacro/clash/component/profile/cachefile"
 	"github.com/Dreamacro/clash/component/trie"
 )
 
@@ -162,14 +161,8 @@ func New(options Options) (*Pool, error) {
 		host:    options.Host,
 		ipnet:   options.IPNet,
 	}
-	if options.Persistence {
-		pool.store = &cachefileStore{
-			cache: cachefile.Cache(),
-		}
-	} else {
-		pool.store = &memoryStore{
-			cache: cache.New(cache.WithSize(options.Size * 2)),
-		}
+	pool.store = &memoryStore{
+		cache: cache.New(cache.WithSize(options.Size * 2)),
 	}
 
 	return pool, nil
