@@ -22,7 +22,6 @@ require (
 	golang.org/x/sync v0.12.0
 	golang.org/x/sys v0.31.0
 	golang.zx2c4.com/wireguard/windows v0.5.3
-	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
@@ -37,4 +36,5 @@ require (
 	golang.org/x/mod v0.23.0 // indirect
 	golang.org/x/text v0.23.0 // indirect
 	golang.org/x/tools v0.30.0 // indirect
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 )

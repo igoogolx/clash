@@ -3,7 +3,6 @@ package provider
 import (
 	"encoding/json"
 	"errors"
-	"fmt"
 	"runtime"
 	"time"
 
@@ -15,7 +14,6 @@ import (
 
 	regexp "github.com/dlclark/regexp2"
 	"github.com/samber/lo"
-	"gopkg.in/yaml.v3"
 )
 
 var reject = adapter.NewProxy(outbound.NewReject())
@@ -98,73 +96,6 @@ func (pp *proxySetProvider) setProxies(proxies []C.Proxy) {
 func stopProxyProvider(pd *ProxySetProvider) {
 	pd.healthCheck.close()
 	pd.fetcher.Destroy()
-}
-
-func NewProxySetProvider(name string, interval time.Duration, filter string, vehicle types.Vehicle, hc *HealthCheck) (*ProxySetProvider, error) {
-	filterReg, err := regexp.Compile(filter, regexp.None)
-	if err != nil {
-		return nil, fmt.Errorf("invalid filter regex: %w", err)
-	}
-
-	if hc.auto() {
-		go hc.process()
-	}
-
-	pd := &proxySetProvider{
-		proxies:     []C.Proxy{},
-		healthCheck: hc,
-	}
-
-	onUpdate := func(elm any) {
-		ret := elm.([]C.Proxy)
-		pd.setProxies(ret)
-	}
-
-	proxiesParseAndFilter := func(buf []byte) (any, error) {
-		schema := &ProxySchema{}
-
-		if err := yaml.Unmarshal(buf, schema); err != nil {
-			return nil, err
-		}
-
-		if schema.Proxies == nil {
-			return nil, errors.New("file must have a `proxies` field")
-		}
-
-		proxies := []C.Proxy{}
-		for idx, mapping := range schema.Proxies {
-			if name, ok := mapping["name"].(string); ok && len(filter) > 0 {
-				matched, err := filterReg.MatchString(name)
-				if err != nil {
-					return nil, fmt.Errorf("regex filter failed: %w", err)
-				}
-				if !matched {
-					continue
-				}
-			}
-			proxy, err := adapter.ParseProxy(mapping)
-			if err != nil {
-				return nil, fmt.Errorf("proxy %d error: %w", idx, err)
-			}
-			proxies = append(proxies, proxy)
-		}
-
-		if len(proxies) == 0 {
-			if len(filter) > 0 {
-				return nil, errors.New("doesn't match any proxy, please check your filter")
-			}
-			return nil, errors.New("file doesn't have any proxy")
-		}
-
-		return proxies, nil
-	}
-
-	fetcher := newFetcher(name, interval, vehicle, proxiesParseAndFilter, onUpdate)
-	pd.fetcher = fetcher
-
-	wrapper := &ProxySetProvider{pd}
-	runtime.SetFinalizer(wrapper, stopProxyProvider)
-	return wrapper, nil
 }
 
 // for auto gc
