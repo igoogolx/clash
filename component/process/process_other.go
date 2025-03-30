@@ -1,4 +1,4 @@
-//go:build !darwin && !linux && !windows && !freebsd
+//go:build !darwin && !windows && !freebsd
 
 package process
 
