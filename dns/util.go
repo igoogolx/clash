@@ -101,9 +101,6 @@ func transform(servers []NameServer, getDialer func() (C.Proxy, error)) []dnsCli
 		case "https":
 			ret = append(ret, newDoHClient(s.Addr, getDialer))
 			continue
-		case "dhcp":
-			ret = append(ret, newDHCPClient(s.Addr, getDialer))
-			continue
 		case "system":
 			ret = append(ret, newSystemClient(s.Interface, getDialer))
 			continue
