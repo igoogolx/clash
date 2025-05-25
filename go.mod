@@ -9,7 +9,6 @@ require (
 	github.com/dlclark/regexp2 v1.11.5
 	github.com/gofrs/uuid/v5 v5.3.2
 	github.com/gorilla/websocket v1.5.3
-	github.com/insomniacslk/dhcp v0.0.0-20250417080101-5f8cf70e8c5f
 	github.com/miekg/dns v1.1.66
 	github.com/samber/lo v1.50.0
 	github.com/sirupsen/logrus v1.9.3
@@ -24,10 +23,7 @@ require (
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect
-	github.com/josharian/native v1.1.0 // indirect
-	github.com/pierrec/lz4/v4 v4.1.14 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect
-	github.com/u-root/uio v0.0.0-20230220225925-ffce2a382923 // indirect
 	golang.org/x/mod v0.24.0 // indirect
 	golang.org/x/text v0.25.0 // indirect
 	golang.org/x/tools v0.33.0 // indirect
