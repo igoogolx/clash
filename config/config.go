@@ -164,6 +164,9 @@ func ParseNameServer(servers []string) ([]dns.NameServer, error) {
 		case "system":
 			addr = u.Host
 			dnsNetType = "system" // UDP from System
+		case "fake-ip":
+			addr = u.Host
+			dnsNetType = "fake-ip" // Fake Ip
 		default:
 			return nil, fmt.Errorf("DNS NameServer[%d] unsupport scheme: %s", idx, u.Scheme)
 		}
