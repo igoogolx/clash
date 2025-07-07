@@ -349,7 +349,7 @@ func NewResolver(config Config) *Resolver {
 
 	r := &Resolver{
 		ipv6:          config.IPv6,
-		main:          transform(config.Main, config.GetDialer),
+		main:          transform(config.Main, config.GetDialer, config.Pool),
 		lruCache:      cache.New(cache.WithSize(4096), cache.WithStale(true)),
 		hosts:         config.Hosts,
 		searchDomains: config.SearchDomains,
@@ -357,13 +357,13 @@ func NewResolver(config Config) *Resolver {
 	}
 
 	if len(config.Fallback) != 0 {
-		r.fallback = transform(config.Fallback, config.GetDialer)
+		r.fallback = transform(config.Fallback, config.GetDialer, config.Pool)
 	}
 
 	if len(config.Policy) != 0 {
 		r.policy = trie.New()
 		for domain, nameserver := range config.Policy {
-			r.policy.Insert(domain, transform([]NameServer{nameserver}, config.GetDialer))
+			r.policy.Insert(domain, transform([]NameServer{nameserver}, config.GetDialer, config.Pool))
 		}
 	}
 
