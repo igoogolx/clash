@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"errors"
 	"fmt"
+	"github.com/Dreamacro/clash/component/fakeip"
 	C "github.com/Dreamacro/clash/constant"
 	"net"
 	"strings"
@@ -94,7 +95,7 @@ func isIPRequest(q D.Question) bool {
 	return q.Qclass == D.ClassINET && (q.Qtype == D.TypeA || q.Qtype == D.TypeAAAA)
 }
 
-func transform(servers []NameServer, getDialer func() (C.Proxy, error)) []dnsClient {
+func transform(servers []NameServer, getDialer func() (C.Proxy, error), fakeIpPool *fakeip.Pool) []dnsClient {
 	ret := []dnsClient{}
 	for _, s := range servers {
 		switch s.Net {
@@ -103,6 +104,9 @@ func transform(servers []NameServer, getDialer func() (C.Proxy, error)) []dnsCli
 			continue
 		case "system":
 			ret = append(ret, newSystemClient(s.Interface, getDialer))
+			continue
+		case "fake-ip":
+			ret = append(ret, newFakeIpClient(fakeIpPool))
 			continue
 		}
 

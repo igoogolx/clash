@@ -75,7 +75,7 @@ func (s *systemClient) update() error {
 
 	}
 
-	res = transform(nameserver, s.getDialer)
+	res = transform(nameserver, s.getDialer, nil)
 	s.lock.Lock()
 	s.clients = res
 	s.lock.Unlock()

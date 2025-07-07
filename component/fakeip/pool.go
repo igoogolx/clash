@@ -136,10 +136,6 @@ type Options struct {
 	// Size sets the maximum number of entries in memory
 	// and does not work if Persistence is true
 	Size int
-
-	// Persistence will save the data to disk.
-	// Size will not work and record will be fully stored.
-	Persistence bool
 }
 
 // New return Pool instance
